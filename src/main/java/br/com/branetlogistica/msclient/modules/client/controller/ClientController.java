@@ -23,11 +23,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.querydsl.core.types.Predicate;
 
+import br.com.branetlogistica.msclient.modules.client.dto.ClientApplicationInfo;
+import br.com.branetlogistica.msclient.modules.client.dto.ClientApplicationRequest;
+import br.com.branetlogistica.msclient.modules.client.dto.ClientApplicationResponse;
 import br.com.branetlogistica.msclient.modules.client.dto.ClientModuleRequest;
 import br.com.branetlogistica.msclient.modules.client.dto.ClientModuleResponse;
 import br.com.branetlogistica.msclient.modules.client.dto.ClientRequest;
 import br.com.branetlogistica.msclient.modules.client.dto.ClientResponse;
 import br.com.branetlogistica.msclient.modules.client.model.ClientView;
+import br.com.branetlogistica.msclient.modules.client.service.ClientApplicationService;
 import br.com.branetlogistica.msclient.modules.client.service.ClientModuleService;
 import br.com.branetlogistica.msclient.modules.client.service.ClientService;
 
@@ -40,6 +44,9 @@ public class ClientController {
 
 	@Autowired
 	private ClientModuleService clientModuleService;
+	
+	@Autowired
+	private ClientApplicationService clientApplicationService;
 
 
 	@GetMapping
@@ -105,5 +112,44 @@ public class ClientController {
         clientModuleService.disable(clientId, moduleId);
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
+	
+	@GetMapping(path = "/{clientId}/apps")
+	public ResponseEntity<Page<?>> pageClientApplication(@PathVariable(name = "clientId") Long clientId,
+			Pageable pageable) {
+		Page<?> page = clientApplicationService.page(clientId, pageable);
+		return new ResponseEntity<>(page, HttpStatus.OK);
+	}
+
+	@GetMapping(path = "/{clientId}/apps/{appId}")
+	public ResponseEntity<?> findClientApplication(@PathVariable(name = "clientId") Long clientId,
+			@PathVariable(name = "appId") Long appId) {
+		ClientApplicationResponse response = clientApplicationService.findByClientIdAndApplicationIdResponse(clientId,
+				appId);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@GetMapping(path = "findByUUID/{UUID}/apps/{appKey}")
+	public ResponseEntity<?> findClientApplication(@PathVariable(name = "UUID") String UUID,
+			@PathVariable(name = "appKey") String appKey) {
+		ClientApplicationInfo info = clientApplicationService.findByClientUUIDAInfo(UUID, appKey);
+		return new ResponseEntity<>(info, HttpStatus.OK);
+	}
+
+	@PostMapping(path = "/{clientId}/apps")
+	public ResponseEntity<?> addApplication(@PathVariable(name = "clientId") Long clientId,
+			@Valid @RequestBody ClientApplicationRequest request) {
+		ClientApplicationResponse response = clientApplicationService.insert(clientId, request);
+		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+		headers.add(HttpHeaders.LOCATION, "/" + clientId + "/apps/" + response.getApplication().getId());
+		return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
+	}
+
+	@DeleteMapping(path = "/{clientId}/apps/{appId}")
+	public ResponseEntity<?> deleteClientApplication(@PathVariable(name = "clientId") Long clientId,
+			@PathVariable(name = "appId") Long appId) {
+		clientApplicationService.disable(clientId, appId);
+		return new ResponseEntity<>(null, HttpStatus.OK);
+	}
+
 
 }

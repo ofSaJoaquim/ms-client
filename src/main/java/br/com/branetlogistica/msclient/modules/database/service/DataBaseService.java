@@ -5,8 +5,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-
 import br.com.branetlogistica.msclient.core.exceptions.NotFoundException;
+import br.com.branetlogistica.msclient.modules.client.model.ClientApplication;
 import br.com.branetlogistica.msclient.modules.database.model.DataBase;
 import br.com.branetlogistica.msclient.modules.database.repository.DataBaseRepository;
 
@@ -41,7 +41,7 @@ public class DataBaseService {
 		return obj.orElseThrow(() -> new NotFoundException("Base de dados não encontrado"));
 	}
 	
-	/*public void initDataBase(ClientApplication clientApplication) {
+	public void initDataBase(ClientApplication clientApplication) {
 		
 		if(clientApplication.getApplication().getDataBase()==null)
 			return;
@@ -57,6 +57,6 @@ public class DataBaseService {
 			if(!ConnectionFactory.checaSchemaExiste(clientApplication.getApplication().getDataBase(),schema,dataBaseName))
 				ConnectionFactory.iniciarBaseDados(clientApplication.getApplication().getDataBase(),schema,dataBaseName);
 			}
-	}*/
+	}
 	
 }
