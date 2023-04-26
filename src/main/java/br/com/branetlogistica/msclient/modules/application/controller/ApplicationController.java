@@ -1,5 +1,4 @@
-package br.com.branetlogistica.msclient.modules.module.controler;
-
+package br.com.branetlogistica.msclient.modules.application.controller;
 
 import javax.validation.Valid;
 import javax.ws.rs.core.HttpHeaders;
@@ -23,52 +22,53 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.querydsl.core.types.Predicate;
 
-import br.com.branetlogistica.msclient.modules.module.converter.ModuleConverter;
-import br.com.branetlogistica.msclient.modules.module.dto.ModuleRequest;
-import br.com.branetlogistica.msclient.modules.module.dto.ModuleResponse;
-import br.com.branetlogistica.msclient.modules.module.model.Module;
-import br.com.branetlogistica.msclient.modules.module.model.ModuleView;
-import br.com.branetlogistica.msclient.modules.module.service.ModuleService;
+import br.com.branetlogistica.msclient.modules.application.converter.ApplicationConverter;
+import br.com.branetlogistica.msclient.modules.application.dto.ApplicationRequest;
+import br.com.branetlogistica.msclient.modules.application.dto.ApplicationResponse;
+import br.com.branetlogistica.msclient.modules.application.model.Application;
+import br.com.branetlogistica.msclient.modules.application.service.ApplicationService;
+import br.com.branetlogistica.msclient.modules.client.model.ClientView;
 
 @RestController
-@RequestMapping("/modules")
-public class ModuleController {
+@RequestMapping("/apps")
+public class ApplicationController {
 
 	@Autowired
-	private ModuleService service;
+	private ApplicationService service;
 	
 	@Autowired
-	private ModuleConverter converter;
+	private ApplicationConverter converter;
 	
 
 	
 	@GetMapping
-    public ResponseEntity<Page<?>> page(@QuerydslPredicate(root = ModuleView.class) Predicate predicate, Pageable pageable) {
+    public ResponseEntity<Page<?>> page(@QuerydslPredicate(root = ClientView.class) Predicate predicate, Pageable pageable) {
         Page<?> productValues = service.page(predicate, pageable);
         return new ResponseEntity<>(productValues, HttpStatus.OK);
     }
 	
 	@GetMapping(path = "/{id}")
     public ResponseEntity<?> find(@PathVariable Long id) {
-        ModuleResponse response = converter.toResponse(service.findById(id));
+        ApplicationResponse response = converter.toResponse(service.findById(id));
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 		
 	@PostMapping
-    public ResponseEntity<?> insert(@Valid @RequestBody ModuleRequest request) {
-    	ModuleResponse response = converter.toResponse(service.insert(converter.toEntity(request)));
+    public ResponseEntity<?> insert(@Valid @RequestBody ApplicationRequest request) {
+    	ApplicationResponse response = converter.toResponse(service.insert(converter.toEntity(request)));
+    	
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add(HttpHeaders.LOCATION, "/modules/" + response.getId());
+        headers.add(HttpHeaders.LOCATION, "/apps/" + response.getId());
         return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
     }
 	
 	@PutMapping(path = "/{id}")
-    public ResponseEntity<?> insert(@PathVariable Long id, @Valid @RequestBody ModuleRequest request) {
-		Module entity = converter.toEntity(request);
+    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody ApplicationRequest request) {
+		Application entity = converter.toEntity(request);
 		entity.setId(id);
-		ModuleResponse response = converter.toResponse(service.update(entity));
+		ApplicationResponse response = converter.toResponse(service.update(entity));
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add(HttpHeaders.LOCATION, "/modules/" + response.getId());
+        headers.add(HttpHeaders.LOCATION, "/apps/" + response.getId());
         return new ResponseEntity<>(response, headers, HttpStatus.OK);
     }
 	
