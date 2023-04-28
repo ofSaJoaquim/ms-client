@@ -21,6 +21,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import br.com.branetlogistica.msclient.core.context.Context;
+import br.com.branetlogistica.msclient.core.security.dto.ContextToken;
+
 /**
  * Classe responsavel por converter o token gerado pelo Keycloak
  * de maneira a atribuir os authorities do jeito que o spring security
@@ -40,6 +43,12 @@ public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, Abstra
                 .concat(defaultGrantedAuthoritiesConverter.convert(jwt).stream()
                         , extractAuthorities(jwt).stream())
                 .collect(Collectors.toSet());
+    	Context.setContextToken(
+    			new ContextToken(jwt.getClaimAsString("x-tenant-id"), 
+    							Long.parseLong(jwt.getClaimAsString("user-id")), 
+    							jwt.getClaimAsString("sub"), 
+    							jwt.getClaimAsString("preferred_username"), 
+    							jwt.getClaimAsStringList("coast_centers")));
         return new JwtAuthenticationToken(jwt, authorities);
     }
 
