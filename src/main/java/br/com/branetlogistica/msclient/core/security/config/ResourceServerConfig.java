@@ -16,21 +16,12 @@ import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.nimbusds.jwt.proc.JWTClaimsSetAwareJWSKeySelector;
 import com.nimbusds.jwt.proc.JWTProcessor;
 
-import br.com.branetlogistica.msclient.core.security.tenant.TenantRepository;
-
 
 
 
 @Configuration
 public class ResourceServerConfig {
 
-
-    @Bean
-    TenantRepository inMemoryTenantRepository() {
-        TenantRepository tenantRepository = new TenantRepository();
-      //  properties.getIssuers().forEach(i -> tenantRepository.save(new Tenant(i)));
-        return tenantRepository;
-    }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	@Bean

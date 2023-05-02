@@ -2,24 +2,25 @@ package br.com.branetlogistica.msclient.core.security.tenant;
 
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
 import org.springframework.stereotype.Component;
 
+import br.com.branetlogistica.msclient.core.tenant.service.TenantService;
+
 @Component
 public class TenantJwtIssuerValidator implements OAuth2TokenValidator<Jwt> {
-    private final TenantRepository tenantRepository;
+   
+	@Autowired
+	private TenantService tenantService;
     private final Map<String, JwtIssuerValidator> validators = new ConcurrentHashMap<>();
 
-    public TenantJwtIssuerValidator(TenantRepository tenantRepository) {
-        this.tenantRepository = tenantRepository;
-    }
-
+    
     @Override
     public OAuth2TokenValidatorResult validate(Jwt token) {
         return this.validators.computeIfAbsent(toTenant(token), this::fromTenant)
@@ -27,13 +28,11 @@ public class TenantJwtIssuerValidator implements OAuth2TokenValidator<Jwt> {
     }
 
     private String toTenant(Jwt jwt) {
-        return jwt.getIssuer().toString();
+    	 return jwt.getClaimAsString("x-tenant-id");       
     }
 
     private JwtIssuerValidator fromTenant(String tenant) {
-        return Optional.ofNullable(this.tenantRepository.findById(tenant))
-                .map(t -> (String)t.getAttribute("issuer"))
-                .map(JwtIssuerValidator::new)
-                .orElseThrow(() -> new IllegalArgumentException("unknown tenant"));
+               
+        return new JwtIssuerValidator(tenantService.findTenant(tenant).getAttribute("issuer").toString());
     }
 }

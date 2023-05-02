@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import br.com.branetlogistica.msclient.core.context.Context;
+import feign.Util;
+
 
 
 @RestControllerAdvice
@@ -21,6 +24,7 @@ public class ApiExceptionHandler {
                         .error(status.getReasonPhrase())
                         .message(ex.getMessage())
                         .errors(ex.getErrors())
+                        .path(Context.getContextData()!=null && !Util.isBlank(Context.getContextData().getUrl())?Context.getContextData().getUrl():null)
                         .build();
         return new ResponseEntity<>(errorDetails, status);
     }
