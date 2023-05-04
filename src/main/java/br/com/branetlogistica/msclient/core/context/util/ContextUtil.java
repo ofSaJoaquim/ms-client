@@ -13,9 +13,12 @@ import feign.Util;
 public class ContextUtil {
 
 	public static ContextData toContextData(Jwt jwt) {
-		return ContextData.builder().tenantId(jwt.getClaimAsString("x-tenant-id"))
+		boolean isService = jwt.getClaimAsBoolean("is_service");
+		return ContextData.builder().tenantId(jwt.getClaimAsString("x-tenant-id"))		
 				.userId(Long.parseLong(jwt.getClaimAsString("user-id"))).sub(jwt.getClaimAsString("sub"))
-				.centerCoasts(jwt.getClaimAsStringList("coast-centers")).build();
+				.centerCoasts(isService?null:jwt.getClaimAsStringList("coast-centers"))
+				.service(isService)
+				.build();
 	}
 
 	public static ContextData toContextData(ContextData contextData, HttpServletRequest request, Object object) {
@@ -34,12 +37,17 @@ public class ContextUtil {
 			if (!contextData.getTenantId().equals(tenantId))
 				throw new ApiException(HttpStatus.BAD_REQUEST, "x-tenant-id invalid", null);
 
-			contextData = ContextData.builder().tenantId(tenantId).method(methodName).className(contollerClass).url(uri)
-					.centerCoasts(contextData.getCenterCoasts()).sub(contextData.getSub())
-					.userId(contextData.getUserId()).build();
+			contextData = ContextData.builder()
+					.tenantId(tenantId)
+					.method(methodName).className(contollerClass).url(uri)
+					.centerCoasts(contextData.getCenterCoasts())
+					.sub(contextData.getSub())
+					.userId(contextData.getUserId())
+					.service(contextData.isService())
+					.build();
 		}
 
-		if (!Util.isBlank(centerCoasId)) {
+		if (!Util.isBlank(centerCoasId) && !contextData.isService()) {
 
 			if (contextData.getCenterCoasts() == null || contextData.getCenterCoasts().isEmpty()
 					|| !contextData.getCenterCoasts().contains(centerCoasId))

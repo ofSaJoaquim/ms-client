@@ -19,6 +19,7 @@ public class ContextData {
 	private final String method;
 	private final String className;
 	private final String url;
+	private final boolean service;
 	
 	private final List<String>centerCoasts;
 	
